@@ -4,9 +4,16 @@
 
 struct TrieNode
 {
-    uint8_t flag;
+    explicit TrieNode();
 
+    uint32_t flag;
+
+
+    bool is_root(bool root);
     bool is_root();
+
+    bool is_leaf(bool leaf);
+    bool is_leaf();
 
 
 };

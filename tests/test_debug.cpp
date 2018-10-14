@@ -1,8 +1,9 @@
 #include <DebugLog.h>
+#include <iostream>
 
 
 int main(int argc, char* argv[])
 {
-    LOG_DEBUG("just debug %d", 123);
+    
 }
 
