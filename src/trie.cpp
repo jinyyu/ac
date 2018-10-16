@@ -64,28 +64,20 @@ bool TrieNode::is_accept()
 
 void TrieNode::insert(const char* data, int len)
 {
-    if (!prefix_) {
-        prefix_ = new Slice(data , level_);
-    }
+    int prefix_len = level_ + 1;
 
-
-
-
-    if (len - level_ == 1) {
-        //last level
-        is_leaf(true);
-        is_accept(true);
+    if (level_ == len) {
         return;
     }
 
     char c = data[level_];
-    LOG_DEBUG("%c level = %d, prefix = %s",c, level_,  prefix_->to_string().c_str());
-
     TrieNode* node = nodes_[c];
     if (!node) {
-        node = new TrieNode(level_ + 1);
+        node = new TrieNode(prefix_len);
         node->parent_ = this;
         nodes_[c] = node;
+        node->prefix_ = new Slice(data, prefix_len);
+        LOG_DEBUG("level = %d, prefix = %s", level_+1, node->prefix_->to_string().c_str());
     }
 
     node->insert(data, len);
