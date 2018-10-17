@@ -15,6 +15,8 @@ public:
 private:
     void build_trie();
 
+    void build_fail();
+
     std::vector<std::string> strings_;
     TrieNode* root_;
 };

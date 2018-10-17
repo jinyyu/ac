@@ -8,6 +8,8 @@ class TrieNode
 public:
     explicit TrieNode(int level);
 
+    ~TrieNode();
+
     bool is_root(bool root);
     bool is_root();
 
@@ -17,16 +19,16 @@ public:
     bool is_accept(bool accept);
     bool is_accept();
 
+    TrieNode* search(const char* data, int len);
+
     void insert(const char* data, int len);
-
-    int level() { return level_; }
-
-private:
+public:
     uint32_t flag_;
     int level_;
     Slice* prefix_;
     TrieNode* nodes_[256];
     TrieNode* parent_;
+    TrieNode* fail_;
 };
 
 #endif //AHO_CORASICK_PROJECT_TRIE_H

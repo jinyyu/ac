@@ -11,10 +11,18 @@ TrieNode::TrieNode(int level)
     : flag_(FLAG_ROOT | FLAG_LEAF),
       level_(level),
       parent_(NULL),
-      prefix_(NULL)
+      prefix_(NULL),
+      fail_(NULL)
 {
     is_accept(false);
     memset(nodes_, 0, sizeof(nodes_));
+}
+
+TrieNode::~TrieNode()
+{
+    if (prefix_) {
+        delete (prefix_);
+    }
 }
 
 bool TrieNode::is_root()
@@ -73,12 +81,32 @@ void TrieNode::insert(const char* data, int len)
     char c = data[level_];
     TrieNode* node = nodes_[c];
     if (!node) {
+        //new node
+        this->is_leaf(false);
         node = new TrieNode(prefix_len);
         node->parent_ = this;
         nodes_[c] = node;
         node->prefix_ = new Slice(data, prefix_len);
-        LOG_DEBUG("level = %d, prefix = %s", level_+1, node->prefix_->to_string().c_str());
+        LOG_DEBUG("level = %d, prefix = %s", level_ + 1, node->prefix_->to_string().c_str());
     }
 
     node->insert(data, len);
+}
+
+TrieNode* TrieNode::search(const char* data, int len)
+{
+    if (len == 0) {
+        return this;
+    }
+
+    if (is_leaf()) {
+        return NULL;
+    }
+
+    char c = data[0];
+    TrieNode* node = nodes_[c];
+    if (!node) {
+        return NULL;
+    }
+    return node->search(data +1, len -1);
 }
