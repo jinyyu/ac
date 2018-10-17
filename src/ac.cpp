@@ -57,8 +57,21 @@ void ACMatcher::build_fail()
             if (n->level_ <= 1) {
                 n->fail_ = root_;
             }
+            else {
+                assert(n->prefix_->size() > 1);
+                n->fail_ = root_;
 
-            LOG_DEBUG("level = %d, prefix = %s", n->level_, n->prefix_->to_string().c_str());;
+                for (int i = 1; i < n->prefix_->size(); ++i) {
+                    Slice data(n->prefix_->data()+1, n->prefix_->size() - 1);
+
+                    TrieNode* failed_node = root_->search(data.data(), data.size());
+                    if (failed_node) {
+                        LOG_DEBUG("prefix = %s, found %s", n->prefix_->to_string().c_str(), data.to_string().c_str());
+                        n->fail_ = failed_node;
+                        break;
+                    }
+                }
+            }
             nodes.push_back(n);
         }
     }
