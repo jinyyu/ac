@@ -56,7 +56,7 @@ void ACMatcher::build_fail()
             continue;
         }
 
-        assert(node->prefix_->size() >1);
+        assert(node->prefix_->size() > 1);
 
         for (int i = 1; i < node->prefix_->size(); ++i) {
             Slice data(node->prefix_->data() + i, node->prefix_->size() - i);
@@ -68,6 +68,30 @@ void ACMatcher::build_fail()
                 break;
             }
         }
+    }
+}
 
+Slice* ACMatcher::search(const char* data, int len)
+{
+    TrieNode* node = root_;
+
+    for (int i = 0; i < len; ++i) {
+        if (node->is_accept()) {
+            break;
+        }
+        char c = data[i];
+        TrieNode* next = node->nodes_[c];
+        if (next) {
+            node = next;
+        }
+        else {
+            node = node->fail_;
+        }
+    }
+
+    if (node->is_accept()) {
+        return node->prefix_;
+    } else {
+        return NULL;
     }
 }

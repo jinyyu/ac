@@ -78,6 +78,7 @@ void TrieNode::insert(const char* data, int len)
     int prefix_len = level_ + 1;
 
     if (level_ == len) {
+        is_accept(true);
         return;
     }
 
@@ -111,5 +112,5 @@ TrieNode* TrieNode::search(const char* data, int len)
     if (!node) {
         return NULL;
     }
-    return node->search(data +1, len -1);
+    return node->search(data + 1, len - 1);
 }

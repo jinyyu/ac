@@ -1,4 +1,5 @@
 #include <ac/ac.h>
+#include <DebugLog.h>
 
 
 int main(int argc, char* argv[])
@@ -11,5 +12,15 @@ int main(int argc, char* argv[])
     strings.emplace_back("his");
 
     ACMatcher matcher(strings);
+
+
+    const char* str = "iiiiiiiiiiiiiiiiiiheo";
+
+    Slice* slice = matcher.search(str, strlen(str));
+    if (slice) {
+        LOG_DEBUG("ok", slice->to_string().c_str());
+    } else {
+        LOG_DEBUG("no ok");
+    }
 }
 
