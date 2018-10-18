@@ -16,6 +16,9 @@ TrieNode::TrieNode(int level)
 {
     is_accept(false);
     memset(nodes_, 0, sizeof(nodes_));
+    if (level) {
+        is_root(false);
+    }
 }
 
 TrieNode::~TrieNode()
