@@ -19,10 +19,15 @@ public:
     bool is_accept(bool accept);
     bool is_accept();
 
+    TrieNode* next(char c);
+
     TrieNode* search(const char* data, int len);
 
     void insert(const char* data, int len);
+
+    std::string prefix();
 public:
+    char character_;
     uint32_t flag_;
     int level_;
     Slice* prefix_;

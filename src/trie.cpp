@@ -3,16 +3,17 @@
 #include <assert.h>
 #include "DebugLog.h"
 
-#define FLAG_ROOT   (0x1 << 0)
-#define FLAG_LEAF   (0x1 << 1)
-#define FLAG_ACCEPT (0x1 << 2)
+#define FLAG_ROOT   (0x01 << 0)
+#define FLAG_LEAF   (0x01 << 1)
+#define FLAG_ACCEPT (0x01 << 2)
 
 TrieNode::TrieNode(int level)
     : flag_(FLAG_ROOT | FLAG_LEAF),
       level_(level),
       parent_(NULL),
       prefix_(NULL),
-      fail_(NULL)
+      fail_(NULL),
+      character_(0)
 {
     is_accept(false);
     memset(nodes_, 0, sizeof(nodes_));
@@ -88,6 +89,7 @@ void TrieNode::insert(const char* data, int len)
         //new node
         this->is_leaf(false);
         node = new TrieNode(prefix_len);
+        node->character_ = c;
         node->parent_ = this;
         nodes_[c] = node;
         node->prefix_ = new Slice(data, prefix_len);
@@ -95,6 +97,20 @@ void TrieNode::insert(const char* data, int len)
     }
 
     node->insert(data, len);
+}
+
+std::string TrieNode::prefix()
+{
+    if (is_root()) {
+        return "root";
+    } else {
+        return prefix_->to_string().c_str();
+    }
+}
+
+TrieNode* TrieNode::next(char c)
+{
+    return nodes_[c];
 }
 
 TrieNode* TrieNode::search(const char* data, int len)

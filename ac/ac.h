@@ -13,7 +13,7 @@ public:
 
     ~ACMatcher();
 
-    Slice* search(const char* data, int len);
+    Slice* match_any(const char* data, int len);
 
 private:
     void build_trie();

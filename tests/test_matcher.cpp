@@ -5,18 +5,15 @@
 int main(int argc, char* argv[])
 {
     std::vector<std::string> strings;
-    strings.emplace_back("he");
-    strings.emplace_back("she");
-    strings.emplace_back("her");
-    strings.emplace_back("hers");
-    strings.emplace_back("his");
+    strings.emplace_back("hesf");
+    strings.emplace_back("abcdef");
 
     ACMatcher matcher(strings);
 
 
-    const char* str = "iiiiiiiiiiiiiiiiiiheo";
+    const char* str = "hers";
 
-    Slice* slice = matcher.search(str, strlen(str));
+    Slice* slice = matcher.match_any(str, strlen(str));
     if (slice) {
         LOG_DEBUG("ok", slice->to_string().c_str());
     } else {

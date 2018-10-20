@@ -35,13 +35,53 @@ void ACMatcher::build_trie()
 
 void ACMatcher::build_fail()
 {
+
     std::deque<TrieNode*> nodes;
     nodes.push_back(root_);
+
+    //先处理第一层
+    while (true) {
+        TrieNode* node = nodes.front();
+        if (node->level_ > 0) {
+            //LOG_DEBUG("level = %d, prefix = %s, %c", node->level_, node->prefix_->to_string().c_str(), node->node_);
+        }
+        if (node->level_ > 1) {
+            break;
+        }
+        nodes.pop_front();
+
+        node->fail_ = root_;
+
+        for (int i = 0; i < 256; ++i) {
+            TrieNode* child = node->nodes_[i];
+            if (!child) {
+                continue;
+            }
+            nodes.push_back(child);
+        }
+    }
 
     while (!nodes.empty()) {
         TrieNode* node = nodes.front();
         nodes.pop_front();
-        node->fail_ = root_;
+        assert(node->level_ > 1);
+
+
+        TrieNode* fail = node->parent_->fail_;
+        do {
+            char c = node->character_;
+            TrieNode* child = fail->nodes_[c];
+            if (child && child->character_ == c) {
+                fail = child;
+                LOG_DEBUG("%s -> %s", node->prefix_->to_string().c_str(), fail->prefix_->to_string().c_str());
+                break;
+            }
+            else {
+                fail = fail->fail_;
+            }
+        }
+        while (!fail->is_root());
+        node->fail_ = fail;
 
         for (int i = 0; i < 256; ++i) {
             TrieNode* n = node->nodes_[i];
@@ -50,48 +90,37 @@ void ACMatcher::build_fail()
             }
             nodes.push_back(n);
         }
-
-
-        if (node->level_ <= 1) {
-            continue;
-        }
-
-        assert(node->prefix_->size() > 1);
-
-        for (int i = 1; i < node->prefix_->size(); ++i) {
-            Slice data(node->prefix_->data() + i, node->prefix_->size() - i);
-
-            TrieNode* failed_node = root_->search(data.data(), data.size());
-            if (failed_node) {
-                LOG_DEBUG("%s -> %s", node->prefix_->to_string().c_str(), data.to_string().c_str());
-                node->fail_ = failed_node;
-                break;
-            }
-        }
+        LOG_DEBUG("level = %d, prefix = %s, %c", node->level_, node->prefix_->to_string().c_str(), node->character_);
     }
 }
 
-Slice* ACMatcher::search(const char* data, int len)
+Slice* ACMatcher::match_any(const char* data, int len)
 {
-    TrieNode* node = root_;
+    int position;
+    TrieNode* curr;
+    TrieNode* next;
 
-    for (int i = 0; i < len; ++i) {
-        if (node->is_accept()) {
-            break;
-        }
-        char c = data[i];
-        TrieNode* next = node->nodes_[c];
-        if (next) {
-            node = next;
+    position = 0;
+    curr = root_;
+
+    /* This is the main search loop.
+     * it must be keep as lightweight as possible. */
+    while (position < len) {
+        if (!(next = curr->next(data[position]))) {
+            if (curr->fail_)
+                curr = curr->fail_;
+            else {
+                position++;
+            }
         }
         else {
-            node = node->fail_;
+            curr = next;
+            position++;
+        }
+
+        if (curr->is_accept()) {
+            return curr->prefix_;
         }
     }
-
-    if (node->is_accept()) {
-        return node->prefix_;
-    } else {
-        return NULL;
-    }
+    return NULL;
 }
