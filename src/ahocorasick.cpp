@@ -69,9 +69,9 @@ void AcAutomata::build_fail()
 
         TrieNode* fail = node->parent->failure_node;
         do {
-            char c = node->state;
-            TrieNode* child = fail->all_nodes[c];
-            if (child && child->state == c) {
+            char state = node->state;
+            TrieNode* child = fail->next(state);
+            if (child && child->state == state) {
                 fail = child;
                 LOG_DEBUG("%s -> %s", node->prefix->to_string().c_str(), fail->prefix->to_string().c_str());
                 break;
@@ -81,6 +81,7 @@ void AcAutomata::build_fail()
             }
         }
         while (!fail->is_root());
+
         node->failure_node = fail;
 
         for (int i = 0; i < 256; ++i) {
@@ -96,16 +97,12 @@ void AcAutomata::build_fail()
 
 Slice* AcAutomata::search(const char* data, int len)
 {
-    int position;
-    TrieNode* curr;
-    TrieNode* next;
+    TrieNode* curr = root_;
 
-    position = 0;
-    curr = root_;
-
-    while (position < len) {
-        char c = data[position];
-        if (!(next = curr->next(c))) {
+    for (int position = 0; position < len;) {
+        char state = data[position];
+        TrieNode* next = curr->next(state);
+        if (!next) {
             if (!curr->is_root())
                 curr = curr->failure_node;
             else {

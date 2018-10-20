@@ -19,7 +19,7 @@ public:
     bool is_final(bool final);
     bool is_final();
 
-    TrieNode* next(char c);
+    TrieNode* next(char state);
 
     TrieNode* search(const char* data, int len);
 

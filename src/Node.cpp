@@ -99,9 +99,9 @@ void TrieNode::insert(const char* data, int len)
     node->insert(data, len);
 }
 
-TrieNode* TrieNode::next(char c)
+TrieNode* TrieNode::next(char state)
 {
-    return all_nodes[c];
+    return all_nodes[state];
 }
 
 TrieNode* TrieNode::search(const char* data, int len)
