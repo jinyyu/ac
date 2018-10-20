@@ -2,7 +2,7 @@
 #define AHO_CORASICK_PROJECT_AC_H
 #include <vector>
 #include <string>
-#include <ac/Slice.h>
+#include <ahocorasick/Slice.h>
 
 
 class TrieNode;

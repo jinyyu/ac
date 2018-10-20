@@ -3,20 +3,20 @@ project(Aho-Corasick-project)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(HEADERS ac/ac.h)
+set(HEADERS ahocorasick/ahocorasick.h)
 
 
 set(SRCS
         src/DebugLog.cpp
         src/trie.cpp
-        src/ac.cpp
+        src/ahocorasick.cpp
         )
 
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_library(ac ${SRCS} ${HEADERS})
+add_library(ahocorasick ${SRCS} ${HEADERS})
 
 
 find_package(PkgConfig REQUIRED)

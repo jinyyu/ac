@@ -1,4 +1,4 @@
-set(LIBS ${LIBS} ac)
+set(LIBS ${LIBS} ahocorasick)
 
 add_executable(test_debug test_debug.cpp)
 target_link_libraries(test_debug ${LIBS})

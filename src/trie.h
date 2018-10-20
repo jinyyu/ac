@@ -1,7 +1,7 @@
 #ifndef AHO_CORASICK_PROJECT_TRIE_H
 #define AHO_CORASICK_PROJECT_TRIE_H
 #include <stdint.h>
-#include "ac/Slice.h"
+#include "ahocorasick/Slice.h"
 
 class TrieNode
 {
