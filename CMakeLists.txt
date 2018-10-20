@@ -8,7 +8,7 @@ set(HEADERS ahocorasick/ahocorasick.h)
 
 set(SRCS
         src/DebugLog.cpp
-        src/trie.cpp
+        src/Node.cpp
         src/ahocorasick.cpp
         )
 

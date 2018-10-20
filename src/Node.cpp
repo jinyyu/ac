@@ -1,0 +1,123 @@
+#include "Node.h"
+#include <string.h>
+#include <assert.h>
+#include "DebugLog.h"
+
+#define FLAG_ROOT   (0x01 << 0)
+#define FLAG_LEAF   (0x01 << 1)
+#define FLAG_FINAL  (0x01 << 2)
+
+TrieNode::TrieNode(int level)
+    : flag(FLAG_ROOT | FLAG_LEAF),
+      depth(level),
+      parent(NULL),
+      prefix(NULL),
+      failure_node(NULL),
+      state(0)
+{
+    is_final(false);
+    memset(all_nodes, 0, sizeof(all_nodes));
+    if (level) {
+        is_root(false);
+    }
+}
+
+TrieNode::~TrieNode()
+{
+    if (prefix) {
+        delete (prefix);
+    }
+}
+
+bool TrieNode::is_root()
+{
+    return flag & FLAG_ROOT;
+}
+
+bool TrieNode::is_root(bool root)
+{
+    if (root) {
+        flag |= FLAG_ROOT;
+    }
+    else {
+        flag &= ~FLAG_ROOT;
+    }
+}
+
+bool TrieNode::is_leaf(bool leaf)
+{
+    if (leaf) {
+        flag |= FLAG_LEAF;
+    }
+    else {
+        flag &= ~FLAG_LEAF;
+    }
+}
+
+bool TrieNode::is_leaf()
+{
+    return flag & FLAG_LEAF;
+}
+
+bool TrieNode::is_final(bool final)
+{
+    if (final) {
+        flag |= FLAG_FINAL;
+    }
+    else {
+        flag &= ~FLAG_FINAL;
+    }
+}
+
+bool TrieNode::is_final()
+{
+    return flag & FLAG_FINAL;
+}
+
+void TrieNode::insert(const char* data, int len)
+{
+    int prefix_len = depth + 1;
+
+    if (depth == len) {
+        is_final(true);
+        return;
+    }
+
+    char c = data[depth];
+    TrieNode* node = all_nodes[c];
+    if (!node) {
+        //new node
+        this->is_leaf(false);
+        node = new TrieNode(prefix_len);
+        node->state = c;
+        node->parent = this;
+        all_nodes[c] = node;
+        node->prefix = new Slice(data, prefix_len);
+        LOG_DEBUG("level = %d, prefix = %s", depth + 1, node->prefix->to_string().c_str());
+    }
+
+    node->insert(data, len);
+}
+
+TrieNode* TrieNode::next(char c)
+{
+    return all_nodes[c];
+}
+
+TrieNode* TrieNode::search(const char* data, int len)
+{
+    if (len == 0) {
+        return this;
+    }
+
+    if (is_leaf()) {
+        return NULL;
+    }
+
+    char c = data[0];
+    TrieNode* node = all_nodes[c];
+    if (!node) {
+        return NULL;
+    }
+    return node->search(data + 1, len - 1);
+}

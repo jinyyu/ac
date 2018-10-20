@@ -5,19 +5,19 @@
 int main(int argc, char* argv[])
 {
     std::vector<std::string> strings;
-    strings.emplace_back("he");
-    strings.emplace_back("she");
+    strings.emplace_back("aldkjaflksjalfk");
+    strings.emplace_back("asdeflksadf");
     strings.emplace_back("his");
     strings.emplace_back("hers");
 
-    ACMatcher matcher(strings);
+    AcAutomata matcher(strings);
 
 
     const char* str = "hehers";
 
-    Slice* slice = matcher.match_any(str, strlen(str));
+    Slice* slice = matcher.search(str, strlen(str));
     if (slice) {
-        LOG_DEBUG("ok", slice->to_string().c_str());
+        LOG_DEBUG("ok ---------- %s", slice->to_string().c_str());
     } else {
         LOG_DEBUG("no ok");
     }

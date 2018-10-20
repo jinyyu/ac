@@ -1,5 +1,5 @@
-#ifndef AHO_CORASICK_PROJECT_TRIE_H
-#define AHO_CORASICK_PROJECT_TRIE_H
+#ifndef AHO_CORASICK_PROJECT_NODE_H
+#define AHO_CORASICK_PROJECT_NODE_H
 #include <stdint.h>
 #include "ahocorasick/Slice.h"
 
@@ -16,24 +16,22 @@ public:
     bool is_leaf(bool leaf);
     bool is_leaf();
 
-    bool is_accept(bool accept);
-    bool is_accept();
+    bool is_final(bool final);
+    bool is_final();
 
     TrieNode* next(char c);
 
     TrieNode* search(const char* data, int len);
 
     void insert(const char* data, int len);
-
-    std::string prefix();
 public:
-    char character_;
-    uint32_t flag_;
-    int level_;
-    Slice* prefix_;
-    TrieNode* nodes_[256];
-    TrieNode* parent_;
-    TrieNode* fail_;
+    char state;
+    uint32_t flag;
+    int depth;
+    Slice* prefix;
+    TrieNode* all_nodes[256];
+    TrieNode* parent;
+    TrieNode* failure_node;
 };
 
 #endif //AHO_CORASICK_PROJECT_TRIE_H

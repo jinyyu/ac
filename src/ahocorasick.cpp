@@ -1,10 +1,10 @@
 #include "ahocorasick/ahocorasick.h"
-#include "trie.h"
+#include "Node.h"
 #include "DebugLog.h"
 #include <deque>
 
-ACMatcher::ACMatcher(const std::vector<std::string>& strings)
-    : strings_(strings),
+AcAutomata::AcAutomata(const std::vector<std::string>& patterns)
+    : patterns_(patterns),
       root_(NULL)
 {
     build_trie();
@@ -12,28 +12,28 @@ ACMatcher::ACMatcher(const std::vector<std::string>& strings)
 
 }
 
-ACMatcher::~ACMatcher()
+AcAutomata::~AcAutomata()
 {
     if (root_) {
         delete (root_);
     }
 }
 
-void ACMatcher::build_trie()
+void AcAutomata::build_trie()
 {
-    for (int i = 0; i < strings_.size(); ++i) {
-        if (strings_[i].empty()) {
+    for (int i = 0; i < patterns_.size(); ++i) {
+        if (patterns_[i].empty()) {
             continue;
         }
 
         if (!root_) {
             root_ = new TrieNode(0);
         }
-        root_->insert(strings_[i].c_str(), strings_[i].size());
+        root_->insert(patterns_[i].c_str(), patterns_[i].size());
     }
 }
 
-void ACMatcher::build_fail()
+void AcAutomata::build_fail()
 {
 
     std::deque<TrieNode*> nodes;
@@ -42,18 +42,18 @@ void ACMatcher::build_fail()
     //先处理第一层
     while (true) {
         TrieNode* node = nodes.front();
-        if (node->level_ > 0) {
-            //LOG_DEBUG("level = %d, prefix = %s, %c", node->level_, node->prefix_->to_string().c_str(), node->node_);
+        if (node->depth > 0) {
+            //LOG_DEBUG("level = %d, prefix = %s, %c", node->depth, node->prefix_->to_string().c_str(), node->node_);
         }
-        if (node->level_ > 1) {
+        if (node->depth > 1) {
             break;
         }
         nodes.pop_front();
 
-        node->fail_ = root_;
+        node->failure_node = root_;
 
         for (int i = 0; i < 256; ++i) {
-            TrieNode* child = node->nodes_[i];
+            TrieNode* child = node->all_nodes[i];
             if (!child) {
                 continue;
             }
@@ -64,37 +64,37 @@ void ACMatcher::build_fail()
     while (!nodes.empty()) {
         TrieNode* node = nodes.front();
         nodes.pop_front();
-        assert(node->level_ > 1);
+        assert(node->depth > 1);
 
 
-        TrieNode* fail = node->parent_->fail_;
+        TrieNode* fail = node->parent->failure_node;
         do {
-            char c = node->character_;
-            TrieNode* child = fail->nodes_[c];
-            if (child && child->character_ == c) {
+            char c = node->state;
+            TrieNode* child = fail->all_nodes[c];
+            if (child && child->state == c) {
                 fail = child;
-                LOG_DEBUG("%s -> %s", node->prefix_->to_string().c_str(), fail->prefix_->to_string().c_str());
+                LOG_DEBUG("%s -> %s", node->prefix->to_string().c_str(), fail->prefix->to_string().c_str());
                 break;
             }
             else {
-                fail = fail->fail_;
+                fail = fail->failure_node;
             }
         }
         while (!fail->is_root());
-        node->fail_ = fail;
+        node->failure_node = fail;
 
         for (int i = 0; i < 256; ++i) {
-            TrieNode* n = node->nodes_[i];
+            TrieNode* n = node->all_nodes[i];
             if (!n) {
                 continue;
             }
             nodes.push_back(n);
         }
-        LOG_DEBUG("level = %d, prefix = %s, %c", node->level_, node->prefix_->to_string().c_str(), node->character_);
+        LOG_DEBUG("level = %d, prefix = %s, %c", node->depth, node->prefix->to_string().c_str(), node->state);
     }
 }
 
-Slice* ACMatcher::match_any(const char* data, int len)
+Slice* AcAutomata::search(const char* data, int len)
 {
     int position;
     TrieNode* curr;
@@ -103,12 +103,11 @@ Slice* ACMatcher::match_any(const char* data, int len)
     position = 0;
     curr = root_;
 
-    /* This is the main search loop.
-     * it must be keep as lightweight as possible. */
     while (position < len) {
-        if (!(next = curr->next(data[position]))) {
-            if (curr->fail_)
-                curr = curr->fail_;
+        char c = data[position];
+        if (!(next = curr->next(c))) {
+            if (!curr->is_root())
+                curr = curr->failure_node;
             else {
                 position++;
             }
@@ -118,8 +117,8 @@ Slice* ACMatcher::match_any(const char* data, int len)
             position++;
         }
 
-        if (curr->is_accept()) {
-            return curr->prefix_;
+        if (curr->is_final()) {
+            return curr->prefix;
         }
     }
     return NULL;

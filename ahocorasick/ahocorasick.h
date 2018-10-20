@@ -6,21 +6,21 @@
 
 
 class TrieNode;
-class ACMatcher
+class AcAutomata
 {
 public:
-    explicit ACMatcher(const std::vector<std::string>& strings);
+    explicit AcAutomata(const std::vector<std::string>& patterns);
 
-    ~ACMatcher();
+    ~AcAutomata();
 
-    Slice* match_any(const char* data, int len);
+    Slice* search(const char* data, int len);
 
 private:
     void build_trie();
 
     void build_fail();
 
-    std::vector<std::string> strings_;
+    std::vector<std::string> patterns_;
     TrieNode* root_;
 };
 
