@@ -27,6 +27,11 @@ TrieNode::~TrieNode()
     if (prefix) {
         delete (prefix);
     }
+    for (int i = 0; i < 256; ++i) {
+        if (all_nodes[i]) {
+            delete(all_nodes[i]);
+        }
+    }
 }
 
 bool TrieNode::is_root()
