@@ -109,4 +109,6 @@ inline int Slice::compare(const Slice& b) const
     return r;
 }
 
+
+
 #endif //AHO_CORASICK_PROJECT_SLICE_H

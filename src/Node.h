@@ -16,10 +16,17 @@ public:
     bool is_leaf(bool leaf);
     bool is_leaf();
 
+
     bool is_final(bool final);
     bool is_final();
 
-    TrieNode* next(char state);
+    bool matched(bool matched);
+    bool matched();
+
+    TrieNode* next(char state)
+    {
+        return all_nodes[state];
+    }
 
     TrieNode* search(const char* data, int len);
 

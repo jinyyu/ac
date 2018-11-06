@@ -2,6 +2,12 @@
 #include <DebugLog.h>
 
 
+bool on_match(void* ctx, Slice* slice)
+{
+    fprintf(stderr, "---on match %s\n", slice->to_string().c_str());
+    return false;
+}
+
 int main(int argc, char* argv[])
 {
     std::vector<std::string> strings;
@@ -13,13 +19,18 @@ int main(int argc, char* argv[])
     AcAutomata matcher(strings);
 
 
-    const char* str = "hehers";
+    const char* str = "asdfsafafasfasfaldkjaflksjalfkhishishersasdeflksadf";
 
-    Slice* slice = matcher.search(str, strlen(str));
-    if (slice) {
-        LOG_DEBUG("ok ---------- %s", slice->to_string().c_str());
+    matcher.search(str, strlen(str),on_match, NULL);
+
+    std::vector<Slice> matches;
+    matcher.search_all(str, strlen(str), matches);
+    if (matches.empty()) {
+        fprintf(stderr, "no match\n");
     } else {
-        LOG_DEBUG("no ok");
+        for (auto it = matches.begin(); it != matches.end(); ++it) {
+            fprintf(stderr, "+++match %s\n", it->to_string().c_str());
+        }
     }
 }
 
