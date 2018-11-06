@@ -6,38 +6,7 @@
 #define FLAG_ROOT   (0x01 << 0)
 #define FLAG_LEAF   (0x01 << 1)
 #define FLAG_FINAL  (0x01 << 2)
-
-TrieNode::TrieNode(int level)
-    : flag(FLAG_ROOT | FLAG_LEAF),
-      depth(level),
-      parent(NULL),
-      prefix(NULL),
-      failure_node(NULL),
-      state(0)
-{
-    is_final(false);
-    memset(all_nodes, 0, sizeof(all_nodes));
-    if (level) {
-        is_root(false);
-    }
-}
-
-TrieNode::~TrieNode()
-{
-    if (prefix) {
-        delete (prefix);
-    }
-    for (int i = 0; i < 256; ++i) {
-        if (all_nodes[i]) {
-            delete(all_nodes[i]);
-        }
-    }
-}
-
-bool TrieNode::is_root()
-{
-    return flag & FLAG_ROOT;
-}
+#define FLAG_MATCHED  (0x01 << 3)
 
 bool TrieNode::is_root(bool root)
 {
@@ -47,6 +16,11 @@ bool TrieNode::is_root(bool root)
     else {
         flag &= ~FLAG_ROOT;
     }
+}
+
+bool TrieNode::is_root()
+{
+    return flag & FLAG_ROOT;
 }
 
 bool TrieNode::is_leaf(bool leaf)
@@ -79,6 +53,48 @@ bool TrieNode::is_final()
     return flag & FLAG_FINAL;
 }
 
+bool TrieNode::matched(bool matched)
+{
+    if (matched) {
+        flag |= FLAG_MATCHED;
+    }
+    else {
+        flag &= ~FLAG_MATCHED;
+    }
+}
+
+bool TrieNode::matched()
+{
+    return flag & FLAG_MATCHED;
+}
+
+TrieNode::TrieNode(int level)
+    : flag(FLAG_ROOT | FLAG_LEAF),
+      depth(level),
+      parent(NULL),
+      prefix(NULL),
+      failure_node(NULL),
+      state(0)
+{
+    is_final(false);
+    memset(all_nodes, 0, sizeof(all_nodes));
+    if (level) {
+        is_root(false);
+    }
+}
+
+TrieNode::~TrieNode()
+{
+    if (prefix) {
+        delete (prefix);
+    }
+    for (int i = 0; i < 256; ++i) {
+        if (all_nodes[i]) {
+            delete (all_nodes[i]);
+        }
+    }
+}
+
 void TrieNode::insert(const char* data, int len)
 {
     int prefix_len = depth + 1;
@@ -98,15 +114,9 @@ void TrieNode::insert(const char* data, int len)
         node->parent = this;
         all_nodes[c] = node;
         node->prefix = new Slice(data, prefix_len);
-        LOG_DEBUG("level = %d, prefix = %s", depth + 1, node->prefix->to_string().c_str());
     }
 
     node->insert(data, len);
-}
-
-TrieNode* TrieNode::next(char state)
-{
-    return all_nodes[state];
 }
 
 TrieNode* TrieNode::search(const char* data, int len)

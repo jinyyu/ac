@@ -5,6 +5,8 @@
 #include <ahocorasick/Slice.h>
 
 
+typedef bool (*match_callback)(void* ctx, Slice* slice);
+
 class TrieNode;
 class AcAutomata
 {
@@ -13,7 +15,9 @@ public:
 
     ~AcAutomata();
 
-    Slice* search(const char* data, int len);
+    void search(const char* data, int len, match_callback callback, void* ctx);
+
+    void search_all(const char* data, int len, std::vector<Slice>& patterns);
 
 private:
     void build_trie();
@@ -23,5 +27,6 @@ private:
     std::vector<std::string> patterns_;
     TrieNode* root_;
 };
+
 
 #endif //AHO_CORASICK_PROJECT_AC_H

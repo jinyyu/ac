@@ -73,7 +73,6 @@ void AcAutomata::build_fail()
             TrieNode* child = fail->next(state);
             if (child && child->state == state) {
                 fail = child;
-                LOG_DEBUG("%s -> %s", node->prefix->to_string().c_str(), fail->prefix->to_string().c_str());
                 break;
             }
             else {
@@ -91,11 +90,10 @@ void AcAutomata::build_fail()
             }
             nodes.push_back(n);
         }
-        LOG_DEBUG("level = %d, prefix = %s, %c", node->depth, node->prefix->to_string().c_str(), node->state);
     }
 }
 
-Slice* AcAutomata::search(const char* data, int len)
+void AcAutomata::search(const char* data, int len, match_callback callback, void* ctx)
 {
     TrieNode* curr = root_;
 
@@ -115,8 +113,57 @@ Slice* AcAutomata::search(const char* data, int len)
         }
 
         if (curr->is_final()) {
-            return curr->prefix;
+            bool is_continue = callback(ctx, curr->prefix);
+            if (is_continue) {
+                continue;
+            }
+            else {
+                break;
+            }
         }
     }
-    return NULL;
+}
+
+void AcAutomata::search_all(const char* data, int len, std::vector<Slice>& patterns)
+{
+    TrieNode* curr = root_;
+
+    for (int position = 0; position < len;) {
+        char state = data[position];
+        TrieNode* next = curr->next(state);
+        if (!next) {
+            if (!curr->is_root())
+                curr = curr->failure_node;
+            else {
+                position++;
+            }
+        }
+        else {
+            curr = next;
+            position++;
+        }
+
+        if (curr->is_final()) {
+            curr->matched(true);
+        }
+    }
+
+    std::deque<TrieNode*> nodes;
+    nodes.push_back(root_);
+    while (!nodes.empty()) {
+        TrieNode* node = nodes.front();
+        if (node->matched()) {
+            patterns.push_back(*node->prefix);
+            node->matched(false);
+        }
+        nodes.pop_front();
+
+        for (int i = 0; i < 256; ++i) {
+            TrieNode* n = node->all_nodes[i];
+            if (!n) {
+                continue;
+            }
+            nodes.push_back(n);
+        }
+    }
 }
