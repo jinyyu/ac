@@ -8,7 +8,7 @@
 #define FLAG_FINAL  (0x01 << 2)
 #define FLAG_MATCHED  (0x01 << 3)
 
-bool TrieNode::is_root(bool root)
+void TrieNode::is_root(bool root)
 {
     if (root) {
         flag |= FLAG_ROOT;
@@ -23,7 +23,7 @@ bool TrieNode::is_root()
     return flag & FLAG_ROOT;
 }
 
-bool TrieNode::is_leaf(bool leaf)
+void TrieNode::is_leaf(bool leaf)
 {
     if (leaf) {
         flag |= FLAG_LEAF;
@@ -38,7 +38,7 @@ bool TrieNode::is_leaf()
     return flag & FLAG_LEAF;
 }
 
-bool TrieNode::is_final(bool final)
+void TrieNode::is_final(bool final)
 {
     if (final) {
         flag |= FLAG_FINAL;
@@ -53,7 +53,7 @@ bool TrieNode::is_final()
     return flag & FLAG_FINAL;
 }
 
-bool TrieNode::matched(bool matched)
+void TrieNode::matched(bool matched)
 {
     if (matched) {
         flag |= FLAG_MATCHED;
@@ -69,12 +69,12 @@ bool TrieNode::matched()
 }
 
 TrieNode::TrieNode(int level)
-    : flag(FLAG_ROOT | FLAG_LEAF),
+    : state(0),
+      flag(FLAG_ROOT | FLAG_LEAF),
       depth(level),
-      parent(NULL),
       prefix(NULL),
-      failure_node(NULL),
-      state(0)
+      parent(NULL),
+      failure_node(NULL)
 {
     is_final(false);
     memset(all_nodes, 0, sizeof(all_nodes));
@@ -105,14 +105,14 @@ void TrieNode::insert(const char* data, int len)
     }
 
     char c = data[depth];
-    TrieNode* node = all_nodes[c];
+    TrieNode* node = all_nodes[(uint8_t)c];
     if (!node) {
         //new node
         this->is_leaf(false);
         node = new TrieNode(prefix_len);
         node->state = c;
         node->parent = this;
-        all_nodes[c] = node;
+        all_nodes[(uint8_t)c] = node;
         node->prefix = new Slice(data, prefix_len);
     }
 
@@ -130,7 +130,7 @@ TrieNode* TrieNode::search(const char* data, int len)
     }
 
     char c = data[0];
-    TrieNode* node = all_nodes[c];
+    TrieNode* node = all_nodes[(uint8_t)c];
     if (!node) {
         return NULL;
     }

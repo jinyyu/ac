@@ -21,7 +21,7 @@ AcAutomata::~AcAutomata()
 
 void AcAutomata::build_trie()
 {
-    for (int i = 0; i < patterns_.size(); ++i) {
+    for (size_t i = 0; i < patterns_.size(); ++i) {
         if (patterns_[i].empty()) {
             continue;
         }

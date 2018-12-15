@@ -10,22 +10,22 @@ public:
 
     ~TrieNode();
 
-    bool is_root(bool root);
+    void is_root(bool root);
     bool is_root();
 
-    bool is_leaf(bool leaf);
+    void is_leaf(bool leaf);
     bool is_leaf();
 
 
-    bool is_final(bool final);
+    void is_final(bool final);
     bool is_final();
 
-    bool matched(bool matched);
+    void matched(bool matched);
     bool matched();
 
     TrieNode* next(char state)
     {
-        return all_nodes[state];
+        return all_nodes[(uint8_t)state];
     }
 
     TrieNode* search(const char* data, int len);

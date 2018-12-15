@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(HEADERS ahocorasick/ahocorasick.h)
 
+add_definitions(-Wall)
 
 set(SRCS
         src/DebugLog.cpp
